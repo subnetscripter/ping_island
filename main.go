@@ -1,25 +1,24 @@
 package main
 
 import (
-    "fmt"
-    //"golang.org/x/net/ipv4"
-    "github.com/subnetscripter/ping_island/probe_ping"
-    "log"
+	"fmt"
+	//"golang.org/x/net/ipv4"
+	"github.com/subnetscripter/ping_island/probe_ping"
+	"log"
 )
 
-func main(){
-    fmt.Println("Initiating Program!")
+func main() {
+	fmt.Println("Initiating Program!")
 
-    target:= "8.8.8.8"
+	target := "8.8.8.8"
 
-    pingProbe, err := probe_ping.NewProbe(target)
-    if err != nil{
-        log.Fatal(err)
-    }
-    
+	pingProbe, err := probe_ping.NewProbe(target)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    err = pingProbe.Ping(10, 1)
-    if err != nil{
-        log.Fatal(err)
-    }
+	err = pingProbe.Ping(10, 1)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
