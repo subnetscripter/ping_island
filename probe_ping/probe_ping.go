@@ -7,17 +7,17 @@ another package that can be called from multiple probes.
 */
 
 import (
-    "net"
     "time"
     "fmt"
     "golang.org/x/net/icmp"
     "golang.org/x/net/ipv4"
     "errors"
+    "github.com/subnetscripter/ping_island/network_handler"
 )
 
 //Each probe will be a struct that will perform the operations
 type Probe struct {
-    Addr *net.IPAddr //Resolved IP of the hostname or an IP addresss
+    NetHandler *network_handler.Handler //
     Conn *icmp.PacketConn //Connect used to send the ICMP pings
     Alive bool //Not used right now. Will figure it out later.
     MessageBytes []byte //Message as bytes to send to icmp peer
@@ -25,13 +25,19 @@ type Probe struct {
 }
 
 //Returns a pointer to a new probe with some values set.
-func NewProbe(target *net.IPAddr) (*Probe, error) {
+func NewProbe(target string) (*Probe, error) {
+
+    netHandler, err := network_handler.NewHandler(target)
+    if err != nil{
+        return nil, err
+    }
+
     conn, err := icmp.ListenPacket("ip4:icmp", "0.0.0.0")
     if err != nil{
         return nil, errors.New("Unable to create a PacketConnection. Try using sudo.")
     }
     probe :=  Probe{
-        Addr: target,
+        NetHandler: netHandler,
         Conn: conn,
     }
 
@@ -89,7 +95,7 @@ func (p *Probe) PrepMessage() (error){
 
 //Function internal to the package used to send pings
 func (p *Probe) sendPing() (error){
-    _, err := p.Conn.WriteTo(p.MessageBytes, p.Addr)
+    _, err := p.Conn.WriteTo(p.MessageBytes, p.NetHandler.Addr)
     if err != nil{
         return errors.New("Unable to send pings")
     }
@@ -98,7 +104,7 @@ func (p *Probe) sendPing() (error){
 }
 
 //Internal function used to receive pings.
-func (p *Probe) recvPing() (*icmp.Message, *net.Addr, error){
+func (p *Probe) recvPing() (*icmp.Message, *network_handler.IPAddress, error){
     reply := make([]byte, 1500)
     n, peer, err := p.Conn.ReadFrom(reply)
     if err != nil{
