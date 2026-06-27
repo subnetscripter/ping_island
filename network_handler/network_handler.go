@@ -21,3 +21,7 @@ func NewHandler(target string) (*Handler, error) {
 		Addr: addr,
 	}, nil
 }
+
+func (h *Handler) ReturnIPAddr() IPAddress{
+    return h.Addr
+}
